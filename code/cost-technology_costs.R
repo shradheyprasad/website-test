@@ -12,11 +12,12 @@ library(htmlwidgets)
 # DATA IMPORT
 # ============================================================================
 
-setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/input_data/tables/technology_cost")
+setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/tables")
+
 
 # Technology costs file
 # Columns: period, technology, scenario, variable_cost, fixed_cost
-tech_cost_file <- "cost-technology_costs.csv"
+tech_cost_file <- "technology_cost/cost-technology_costs.csv"
 
 cat("Reading technology costs data...\n")
 tech_cost <- read_csv(tech_cost_file)

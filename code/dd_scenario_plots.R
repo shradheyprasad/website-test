@@ -26,7 +26,6 @@ clean_energy_file <- "clean_energy/demand-clean_energy.csv"
 # Expected columns: scenario, period, clean_pct
 
 scen_labels_file <- "~/Desktop/emLab/wri-india/website/labels/demand-scenario_labels.csv"
-# Expected columns: scenario, zone, label, color, linestyle, marker, linewidth, order
 
 # Read data
 cat("Reading data...\n")
@@ -109,26 +108,26 @@ create_total_cost_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       yaxis = list(
         title = "Costs (Billion USD)",
-        titlefont = list(size = 5),
+        titlefont = list(size = 16),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 5),
+        tickfont = list(size = 14),
         side = "left"
       ),
       yaxis2 = list(
         title = "(Lakh Crores INR)",
-        titlefont = list(size = 5),
+        titlefont = list(size = 16),
         range = c(USD_to_INR * y_min / 1000, USD_to_INR * y_max / 1000),
         overlaying = "y",
         side = "right",
         showgrid = FALSE,
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -139,19 +138,19 @@ create_total_cost_plot <- function(df, scen_labels,
     fig <- fig %>%
       layout(
         legend = list(
-          title = list(text = legend_title, font = list(size = 5)),
+          title = list(text = legend_title, font = list(size = 16)),
           x = 1.15,
           y = 0.5,
           xanchor = "left",
           yanchor = "middle",
-          font = list(size = 5)
+          font = list(size = 14)
         )
       )
   }
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 5), y = 0.95))
+      layout(title = list(text = title, font = list(size = 18), y = 0.95))
   }
   
   return(fig)
@@ -343,16 +342,16 @@ create_emissions_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       yaxis = list(
         title = "GHG Emissions (MtCO₂)",
-        titlefont = list(size = 5),
+        titlefont = list(size = 16),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -363,19 +362,19 @@ create_emissions_plot <- function(df, scen_labels,
     fig <- fig %>%
       layout(
         legend = list(
-          title = list(text = legend_title, font = list(size = 5)),
+          title = list(text = legend_title, font = list(size = 16)),
           x = 1.15,
           y = 0.5,
           xanchor = "left",
           yanchor = "middle",
-          font = list(size = 5)
+          font = list(size = 14)
         )
       )
   }
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 5), y = 0.95))
+      layout(title = list(text = title, font = list(size = 18), y = 0.95))
   }
   
   return(fig)
@@ -444,16 +443,16 @@ create_emissions_intensity_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       yaxis = list(
         title = "GHG Emissions Intensity (tCO₂/MWh)",
-        titlefont = list(size = 5),
+        titlefont = list(size = 16),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -464,19 +463,19 @@ create_emissions_intensity_plot <- function(df, scen_labels,
     fig <- fig %>%
       layout(
         legend = list(
-          title = list(text = legend_title, font = list(size = 5)),
+          title = list(text = legend_title, font = list(size = 16)),
           x = 1.15,
           y = 0.5,
           xanchor = "left",
           yanchor = "middle",
-          font = list(size = 5)
+          font = list(size = 14)
         )
       )
   }
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 5), y = 0.95))
+      layout(title = list(text = title, font = list(size = 18), y = 0.95))
   }
   
   return(fig)
@@ -553,16 +552,16 @@ create_clean_energy_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       yaxis = list(
         title = "Clean Energy (%)",
-        titlefont = list(size = 5),
+        titlefont = list(size = 16),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 5)
+        tickfont = list(size = 14)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -579,7 +578,7 @@ create_clean_energy_plot <- function(df, scen_labels,
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 5), y = 0.95))
+      layout(title = list(text = title, font = list(size = 18), y = 0.95))
   }
   
   return(fig)
@@ -595,7 +594,7 @@ create_5_panel_summary <- function() {
   
   # Create individual plots (matching Python function calls exactly)
   fig_a <- create_total_cost_plot(system_cost, scen_labels, 
-                                   y_min = 0, y_max = 400, legend = FALSE)
+                                   y_min = 0, y_max = 350, legend = FALSE)
   
   # fig_b <- create_levelized_cost_plot(system_cost, load_data, scen_labels, 
   #                                      y_min = 40, y_max = 70, legend = FALSE)
@@ -608,7 +607,7 @@ create_5_panel_summary <- function() {
   
   fig_e <- create_clean_energy_plot(clean_energy, scen_labels, 
                                      y_min = 0, y_max = 100, 
-                                     legend = TRUE, legend_position = Bottom , legend_title = "Demand")
+                                     legend = TRUE, legend_title = "Demand")
   
   # Combine into subplot
   fig <- subplot(
@@ -623,15 +622,15 @@ create_5_panel_summary <- function() {
   # Add panel labels (A, B, C, D, E)
   annotations <- list(
     list(text = "<b>A</b>", x = 0.05, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial")),
+         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
     # list(text = "<b>B</b>", x = 0.24, y = 1.08, xref = "paper", yref = "paper",
     #      xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
     list(text = "<b>C</b>", x = 0.43, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial")),
+         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
     list(text = "<b>D</b>", x = 0.62, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial")),
+         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
     list(text = "<b>E</b>", x = 0.81, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial"))
+         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial"))
   )
   
   fig <- fig %>%
