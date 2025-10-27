@@ -7,12 +7,15 @@ library(tidyr)
 library(readr)
 library(ggforce)
 
-setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/input_data/electricity_system")
+setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/tables")
 
-tx_ <- read_csv("input_data-electricity_system_lines.csv")
-load_zones_ <- read_csv("input_data-electricity_system_load_zones.csv")
-group_cap_ <- read_csv("input_data-electricity_system_groups.csv")
-total_cap_ <- read_csv("input_data-electricity_system_capacity.csv")
+#######################################
+########## India 2020 Tx Map ##########
+#######################################
+tx_ <- read_csv("input_data/electricity_system/input_data-electricity_system_lines.csv")
+load_zones_ <- read_csv("input_data/electricity_system/input_data-electricity_system_load_zones.csv")
+group_cap_ <- read_csv("input_data/electricity_system/input_data-electricity_system_groups.csv")
+total_cap_ <- read_csv("input_data/electricity_system/input_data-electricity_system_capacity.csv")
 india_sf <- st_read("/Users/shradheyprasad/Desktop/emLab/wri-india/website/input_data/map/india/india-polygon.shp")
 
 # CHECK THE DATA STRUCTURE
@@ -228,8 +231,103 @@ interactive_plot <- girafe(
     opts_zoom(max = 5)
   )
 )
-
 interactive_plot
-
 library(htmlwidgets)
 htmltools::save_html(interactive_plot, "/Users/shradheyprasad/Desktop/emLab/repo/website-test/india_2020.html")
+
+#######################################
+########## Solar Resource Map ##########
+#######################################
+
+#######################################
+########## Solar Resource Map ##########
+#######################################
+
+# Solar resource data (shapefile with 'cf' column for capacity factor)
+solar_data_file <- "input_data/solar/solar_resource_zones.shp"
+
+cat("Reading solar resource data...\n")
+solar_sf <- st_read(solar_data_file)
+
+# Transform to same CRS as India map if needed
+solar_sf <- st_transform(solar_sf, st_crs(india_sf))
+
+# Define color scheme and classification rules
+solar_colors <- c('#feeed5', '#fdd3aa', '#ffbc85', '#f8a462', '#f19139')
+solar_breaks <- c(-Inf, 0.17, 0.18, 0.19, 0.20, Inf)
+solar_labels <- c('<17%', '17-17.9%', '18-18.9%', '19-19.9%', '≥20%')
+
+# Classify solar data by capacity factor
+solar_sf <- solar_sf %>%
+  mutate(
+    cf_category = cut(cf, 
+                      breaks = solar_breaks,
+                      labels = solar_labels,
+                      include.lowest = TRUE),
+    cf_pct = round(cf * 100, 1),
+    tooltip = paste0(
+      "<b>Solar Resource</b><br>",
+      "Capacity Factor: ", cf_pct, "%<br>",
+      "Category: ", cf_category
+    ),
+    data_id = paste0("solar_", row_number())
+  )
+
+cat("\n=== Solar Capacity Factor Distribution ===\n")
+print(table(solar_sf$cf_category))
+cat("\n")
+
+# Create solar resource map
+p_solar <- ggplot() +
+  # Solar resource zones (colored by capacity factor)
+  geom_sf_interactive(
+    data = solar_sf,
+    aes(fill = cf_category, tooltip = tooltip, data_id = data_id),
+    color = "white",
+    size = 0.1,
+    alpha = 0.8
+  ) +
+  # India boundary on top
+  geom_sf(
+    data = india_sf,
+    fill = NA,
+    color = "white",
+    size = 0.8
+  ) +
+  scale_fill_manual(
+    name = "Solar Potential\nAverage Capacity\nFactor",
+    values = setNames(solar_colors, solar_labels),
+    guide = guide_legend(override.aes = list(size = 0.5))
+  ) +
+  coord_sf(expand = FALSE) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "right",
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 13, face = "bold"),
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
+  ) +
+  labs(title = "Solar Resource Potential in India")
+
+# Create interactive plot
+interactive_solar <- girafe(
+  ggobj = p_solar,
+  width_svg = 12,
+  height_svg = 14,
+  options = list(
+    opts_hover(css = ""),
+    opts_tooltip(
+      css = "background-color:white;color:black;padding:12px;border-radius:5px;box-shadow:0 0 15px rgba(0,0,0,0.4);font-family:Arial;font-size:13px;line-height:1.5;",
+      opacity = 1
+    ),
+    opts_zoom(max = 5)
+  )
+)
+
+interactive_solar
+
+# Save
+htmltools::save_html(interactive_solar, "/Users/shradheyprasad/Desktop/emLab/repo/website-test/solar_resource_map.html")
+cat("Solar resource map saved!\n")

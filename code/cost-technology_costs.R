@@ -5,14 +5,14 @@ library(readr)
 library(htmlwidgets)
 
 # ============================================================================
-# TECHNOLOGY COSTS BAR CHART
+# TECHNOLOGY COSTS BAR CHART - Matching Python matplotlib style
 # ============================================================================
 
 # ============================================================================
 # DATA IMPORT
 # ============================================================================
 
-setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/input_data/technology_cost")
+setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/input_data/tables/technology_cost")
 
 # Technology costs file
 # Columns: period, technology, scenario, variable_cost, fixed_cost
@@ -22,14 +22,13 @@ cat("Reading technology costs data...\n")
 tech_cost <- read_csv(tech_cost_file)
 
 # ============================================================================
-# TECHNOLOGY COLORS
+# TECHNOLOGY COLORS (matching Python order)
 # ============================================================================
 
 # Define technology order (bottom to top in stacked bar)
-# UPDATE THIS ORDER to match your original plot
 tech_order <- c(
   "Coal",
-  "Gas", 
+  "Gas",
   "Diesel",
   "Nuclear",
   "Other",
@@ -70,9 +69,48 @@ cat("\n")
 
 cat("Preparing data...\n")
 
+# ============================================================================
+# SCENARIO NAME MAPPING - Rename long scenario names to shorter ones
+# ============================================================================
+
+# Map long scenario names to shorter display names
+scenario_mapping <- data.frame(
+  original = c(
+    "VRElow_STlow_CONVmid_H2_RES_8PRM_CC_50RPS_90CAP_500GW_PIERmid",
+    "VRElow_STlow_CONVhigh_H2_RES_8PRM_CC_50RPS_90CAP_500GW_PIERmid",
+    "VREmid_STmid_CONVmid_H2_RES_8PRM_CC_50RPS_90CAP_500GW_PIERmid",
+    "VREmid_STmid_CONVhigh_H2_RES_8PRM_CC_50RPS_90CAP_500GW_PIERmid",
+    "VREhigh_SThigh_CONVmid_H2_RES_8PRM_CC_50RPS_90CAP_500GW_PIERmid",
+    "VREhigh_SThigh_CONVhigh_H2_RES_8PRM_CC_50RPS_90CAP_500GW_PIERmid"
+  ),
+  short = c(
+    "VRE & ESS (low) Coal (low)",
+    "VRE & ESS (low) Coal (high)",
+    "VRE & ESS (mid) Coal (low)",
+    "VRE & ESS (mid) Coal (high)",
+    "VRE & ESS (high) Coal (low)",
+    "VRE & ESS (high) Coal (high)"
+  ),
+  stringsAsFactors = FALSE
+)
+
+# Apply the mapping
+tech_cost <- tech_cost %>%
+  left_join(scenario_mapping, by = c("scenario" = "original")) %>%
+  mutate(scenario_display = ifelse(!is.na(short), short, scenario)) %>%
+  select(-short)
+
+cat("\n=== Scenario Name Mapping ===\n")
+print(scenario_mapping)
+cat("\n")
+
+# ============================================================================
+# DATA PREPARATION
+# ============================================================================
+
 # Get unique periods and scenarios
 periods <- sort(unique(tech_cost$period))
-scenarios <- unique(tech_cost$scenario)
+scenarios <- unique(tech_cost$scenario_display)  # Use display names
 
 cat("Periods:", paste(periods, collapse = ", "), "\n")
 cat("Scenarios:", paste(scenarios, collapse = ", "), "\n")
@@ -99,7 +137,7 @@ for (i_period in 1:n_periods) {
     
     x_positions <- rbind(x_positions, data.frame(
       period = period,
-      scenario = scenario,
+      scenario_display = scenario,  # Using display name
       x_position = x_pos,
       period_index = i_period - 1
     ))
@@ -108,7 +146,7 @@ for (i_period in 1:n_periods) {
 
 # Join positions to data
 tech_cost <- tech_cost %>%
-  left_join(x_positions, by = c("period", "scenario"))
+  left_join(x_positions, by = c("period", "scenario_display"))
 
 # ============================================================================
 # CREATE PLOTLY FIGURE
@@ -177,7 +215,7 @@ for (tech in technologies) {
         hovertemplate = paste0(
           "<b>", tech, " (Variable)</b><br>",
           "Period: ", tech_data$period, "<br>",
-          "Scenario: ", tech_data$scenario, "<br>",
+          "Scenario: ", tech_data$scenario_display, "<br>",
           "Variable Cost: %{y:.2f} B USD<br>",
           "<extra></extra>"
         )
@@ -245,7 +283,7 @@ for (tech in technologies) {
         hovertemplate = paste0(
           "<b>", tech, " (Fixed)</b><br>",
           "Period: ", tech_data$period, "<br>",
-          "Scenario: ", tech_data$scenario, "<br>",
+          "Scenario: ", tech_data$scenario_display, "<br>",
           "Fixed Cost: %{y:.2f} B USD<br>",
           "<extra></extra>"
         )
@@ -306,16 +344,4 @@ fig
 # SAVE
 # ============================================================================
 
-cat("\nSaving plot...\n")
-saveWidget(fig, "technology_costs_by_period.html", selfcontained = TRUE)
-cat("Saved to: technology_costs_by_period.html\n")
-
-# ============================================================================
-# SUMMARY
-# ============================================================================
-
-cat("\n=== PLOT SUMMARY ===\n")
-cat("Number of periods:", n_periods, "\n")
-cat("Number of scenarios per period:", n_scenarios, "\n")
-cat("Total bars:", nrow(x_positions), "\n")
-cat("Bar width:", round(bar_width, 3), "\n")
+saveWidget(fig, "/Users/shradheyprasad/Desktop/emLab/repo/website-test/technology_costs_by_period.html", selfcontained = TRUE)
