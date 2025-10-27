@@ -400,11 +400,11 @@ for (tech in tech_order_filtered) {
         marker = list(
           color = tech_color,
           pattern = list(
-            shape = "x",
+            shape = "/",           # Diagonal lines (like tech costs chart)
             bgcolor = tech_color,  # Use tech color as background
-            fgcolor = "white",      # White hatching lines
-            size = 4,
-            solidity = 0.5
+            fgcolor = "white",     # White hatching lines
+            size = 8,
+            solidity = 0.3
           ),
           line = list(color = "white", width = 0.5)
         ),
@@ -463,7 +463,7 @@ fig <- fig %>%
     marker = list(
       color = "lightgray",
       pattern = list(
-        shape = "x",
+        shape = "/",
         fgcolor = "gray"
       )
     )
@@ -549,4 +549,3 @@ fig
 saveWidget(fig, 
            "/Users/shradheyprasad/Desktop/emLab/repo/website-test/levelized_costs.html", 
            selfcontained = TRUE)
-
