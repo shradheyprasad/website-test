@@ -171,9 +171,10 @@ plot_monthly_demand_plotly <- function(df, fys, scen_labels, i_month, method = "
   # Layout
   fig <- fig %>%
     layout(
+      showlegend = FALSE,   
       title = list(
         text = months[i_month + 1],
-        font = list(size = 18, family = "Arial", face = "bold"),
+        font = list(size = 5, family = "Arial", face = "bold"),
         x = 0.5,
         xanchor = "center"
       ),
@@ -182,14 +183,14 @@ plot_monthly_demand_plotly <- function(df, fys, scen_labels, i_month, method = "
         tickmode = "array",
         tickvals = c(0, 12, 23),
         ticktext = c("1am", "12pm", "12am"),
-        tickfont = list(size = 14),
+        tickfont = list(size = 5),
         range = c(0, 23),
         showgrid = FALSE
       ),
       yaxis = list(
         title = ylabel,
-        titlefont = list(size = 16),
-        tickfont = list(size = 14),
+        titlefont = list(size = 5),
+        tickfont = list(size = 5),
         range = c(-5, 1075),
         showgrid = TRUE,
         gridcolor = "lightgray",
@@ -257,6 +258,12 @@ for (i_month in 0:11) {
   fig <- plot_monthly_demand_plotly(demand_data, fys, scen_labels, 
                                     i_month = i_month, method = method)
   
+  # fig <- fig %>%
+  #   layout(
+  #     width = 800,  # Fixed width in pixels
+  #     height = 400  # Fixed height in pixels
+  #   )
+  
   # Define the full file path
   month_name <- tolower(months[i_month + 1])
   filename <- paste0("/Users/shradheyprasad/Desktop/emLab/repo/website-test/dd_plots/", 
@@ -267,3 +274,111 @@ for (i_month in 0:11) {
   
   cat("  Saved:", filename, "\n")
 }
+
+# After your loop creates all the figures, combine them:
+
+# Create the first month's plot
+fig_combined <- plot_monthly_demand_plotly(demand_data, fys, scen_labels, 
+                                           i_month = 0, method = method)
+
+# Create a list to store all traces with visibility settings
+all_traces <- list()
+
+for (i_month in 0:11) {
+  cat("Adding", months[i_month + 1], "to combined plot...\n")
+  
+  # Get the month's data
+  plot_data <- prepare_monthly_data(demand_data, fys, scen_labels, i_month, method)
+  
+  unique_lines <- plot_data %>%
+    distinct(FY, scenario, line_label, line_color)
+  
+  # Add traces for this month
+  for (i in 1:nrow(unique_lines)) {
+    line_data <- plot_data %>%
+      filter(FY == unique_lines$FY[i], scenario == unique_lines$scenario[i])
+    
+    fig_combined <- fig_combined %>%
+      add_trace(
+        data = line_data,
+        x = ~Interval,
+        y = ~demand_gwh,
+        type = "scatter",
+        mode = "lines",
+        name = unique_lines$line_label[i],
+        line = list(color = unique_lines$line_color[i], width = 2.5),
+        visible = (i_month == 0),  # Only January visible initially
+        legendgroup = paste0("month_", i_month),
+        hovertemplate = paste0(
+          "<b>", unique_lines$line_label[i], "</b><br>",
+          "Hour: %{x}<br>",
+          "Demand: %{y:.1f} GWh<br>",
+          "<extra></extra>"
+        )
+      )
+  }
+}
+
+# Create dropdown buttons for each month
+buttons <- list()
+for (i_month in 0:11) {
+  # Calculate which traces belong to this month
+  # Assuming 5 traces per month (adjust based on your data)
+  traces_per_month <- 5
+  visible_array <- rep(FALSE, 12 * traces_per_month)
+  start_idx <- i_month * traces_per_month + 1
+  end_idx <- start_idx + traces_per_month - 1
+  visible_array[start_idx:end_idx] <- TRUE
+  
+  buttons[[i_month + 1]] <- list(
+    method = "update",
+    args = list(
+      list(visible = visible_array),
+      list(title = months[i_month + 1])
+    ),
+    label = months[i_month + 1]
+  )
+}
+
+# Add the dropdown menu
+fig_combined <- fig_combined %>%
+  layout(
+    updatemenus = list(
+      list(
+        type = "dropdown",
+        active = 0,
+        buttons = buttons,
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top"
+      )
+    ),
+    title = months[1],
+    width = 800,
+    height = 400,
+    showlegend = FALSE,
+    xaxis = list(
+      title = "",
+      tickmode = "array",
+      tickvals = c(0, 12, 23),
+      ticktext = c("1am", "12pm", "12am"),
+      tickfont = list(size = 5),
+      range = c(0, 23),
+      showgrid = FALSE
+    ),
+    yaxis = list(
+      title = "Demand (GWh)",
+      titlefont = list(size = 5),
+      tickfont = list(size = 5),
+      range = c(-5, 1075),
+      showgrid = TRUE,
+      gridcolor = "lightgray",
+      griddash = "dot"
+    )
+  )
+fig_combined
+# Save single combined file
+saveWidget(fig_combined, 
+           "/Users/shradheyprasad/Desktop/emLab/repo/website-test/monthly_demand_all.html",
+           selfcontained = TRUE)

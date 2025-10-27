@@ -109,26 +109,26 @@ create_total_cost_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       yaxis = list(
         title = "Costs (Billion USD)",
-        titlefont = list(size = 16),
+        titlefont = list(size = 5),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 14),
+        tickfont = list(size = 5),
         side = "left"
       ),
       yaxis2 = list(
         title = "(Lakh Crores INR)",
-        titlefont = list(size = 16),
+        titlefont = list(size = 5),
         range = c(USD_to_INR * y_min / 1000, USD_to_INR * y_max / 1000),
         overlaying = "y",
         side = "right",
         showgrid = FALSE,
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -139,19 +139,19 @@ create_total_cost_plot <- function(df, scen_labels,
     fig <- fig %>%
       layout(
         legend = list(
-          title = list(text = legend_title, font = list(size = 16)),
+          title = list(text = legend_title, font = list(size = 5)),
           x = 1.15,
           y = 0.5,
           xanchor = "left",
           yanchor = "middle",
-          font = list(size = 14)
+          font = list(size = 5)
         )
       )
   }
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 18), y = 0.95))
+      layout(title = list(text = title, font = list(size = 5), y = 0.95))
   }
   
   return(fig)
@@ -343,16 +343,16 @@ create_emissions_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       yaxis = list(
         title = "GHG Emissions (MtCO₂)",
-        titlefont = list(size = 16),
+        titlefont = list(size = 5),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -363,19 +363,19 @@ create_emissions_plot <- function(df, scen_labels,
     fig <- fig %>%
       layout(
         legend = list(
-          title = list(text = legend_title, font = list(size = 16)),
+          title = list(text = legend_title, font = list(size = 5)),
           x = 1.15,
           y = 0.5,
           xanchor = "left",
           yanchor = "middle",
-          font = list(size = 14)
+          font = list(size = 5)
         )
       )
   }
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 18), y = 0.95))
+      layout(title = list(text = title, font = list(size = 5), y = 0.95))
   }
   
   return(fig)
@@ -444,16 +444,16 @@ create_emissions_intensity_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       yaxis = list(
         title = "GHG Emissions Intensity (tCO₂/MWh)",
-        titlefont = list(size = 16),
+        titlefont = list(size = 5),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -464,19 +464,19 @@ create_emissions_intensity_plot <- function(df, scen_labels,
     fig <- fig %>%
       layout(
         legend = list(
-          title = list(text = legend_title, font = list(size = 16)),
+          title = list(text = legend_title, font = list(size = 5)),
           x = 1.15,
           y = 0.5,
           xanchor = "left",
           yanchor = "middle",
-          font = list(size = 14)
+          font = list(size = 5)
         )
       )
   }
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 18), y = 0.95))
+      layout(title = list(text = title, font = list(size = 5), y = 0.95))
   }
   
   return(fig)
@@ -553,16 +553,16 @@ create_clean_energy_plot <- function(df, scen_labels,
         title = "",
         showgrid = FALSE,
         zeroline = FALSE,
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       yaxis = list(
         title = "Clean Energy (%)",
-        titlefont = list(size = 16),
+        titlefont = list(size = 5),
         range = c(y_min, y_max),
         showgrid = TRUE,
         gridcolor = "lightgray",
         griddash = "dot",
-        tickfont = list(size = 14)
+        tickfont = list(size = 5)
       ),
       plot_bgcolor = "white",
       paper_bgcolor = "white",
@@ -579,7 +579,7 @@ create_clean_energy_plot <- function(df, scen_labels,
   
   if (title != "") {
     fig <- fig %>%
-      layout(title = list(text = title, font = list(size = 18), y = 0.95))
+      layout(title = list(text = title, font = list(size = 5), y = 0.95))
   }
   
   return(fig)
@@ -608,7 +608,7 @@ create_5_panel_summary <- function() {
   
   fig_e <- create_clean_energy_plot(clean_energy, scen_labels, 
                                      y_min = 0, y_max = 100, 
-                                     legend = TRUE, legend_title = "Demand")
+                                     legend = TRUE, legend_position = Bottom , legend_title = "Demand")
   
   # Combine into subplot
   fig <- subplot(
@@ -623,15 +623,15 @@ create_5_panel_summary <- function() {
   # Add panel labels (A, B, C, D, E)
   annotations <- list(
     list(text = "<b>A</b>", x = 0.05, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
+         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial")),
     # list(text = "<b>B</b>", x = 0.24, y = 1.08, xref = "paper", yref = "paper",
     #      xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
     list(text = "<b>C</b>", x = 0.43, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
+         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial")),
     list(text = "<b>D</b>", x = 0.62, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial")),
+         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial")),
     list(text = "<b>E</b>", x = 0.81, y = 1.08, xref = "paper", yref = "paper",
-         xanchor = "center", showarrow = FALSE, font = list(size = 20, family = "Arial"))
+         xanchor = "center", showarrow = FALSE, font = list(size = 10, family = "Arial"))
   )
   
   fig <- fig %>%
