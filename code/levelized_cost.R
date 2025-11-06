@@ -5,7 +5,7 @@ library(readr)
 library(htmlwidgets)
 
 # ============================================================================
-# LEVELIZED FIXED AND VARIABLE COST BAR CHART - Matching Python matplotlib
+# LEVELIZED FIXED AND VARIABLE COST BAR CHART - Dynamic Version
 # ============================================================================
 
 setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/tables")
@@ -267,16 +267,7 @@ for (i_scen in 1:n_scenarios) {
       pull(load_mw)
     
     if (length(load_val) == 0) {
-      cat("NO LOAD DATA FOUND\n")
-      cat(sprintf("    Looking for: scenario='%s', period=%d\n", scen, period))
-      cat("    Available combinations in load_data:\n")
-      matching <- load_data %>% filter(period == !!period)
-      if (nrow(matching) > 0) {
-        for (i in 1:min(3, nrow(matching))) {
-          cat(sprintf("      scenario='%s', period=%d, load=%.0f\n", 
-                     matching$scenario_display[i], matching$period[i], matching$load_mw[i]))
-        }
-      }
+      cat("No load data - skipping\n")
       next
     }
     
@@ -376,7 +367,7 @@ if (nrow(plot_segments) == 0) {
 }
 
 # ============================================================================
-# CREATE PLOTLY FIGURE
+# CREATE PLOTLY FIGURE - DYNAMIC VERSION
 # ============================================================================
 
 fig <- plot_ly()
@@ -470,7 +461,7 @@ fig <- fig %>%
   )
 
 # ============================================================================
-# LAYOUT
+# LAYOUT - DYNAMIC VERSION (no fixed width/height)
 # ============================================================================
 
 # Calculate x-axis tick positions
@@ -535,17 +526,25 @@ fig <- fig %>%
       yanchor = "top"
     ),
     margin = list(l = 80, r = 200, t = 80, b = 80),
-    width = 1200,
-    height = 600
+    # REMOVED: width and height parameters to make plot dynamic
+    autosize = TRUE  # Enable automatic resizing
+  ) %>%
+  config(
+    responsive = TRUE,  # Make plot responsive to container size
+    displayModeBar = TRUE,
+    displaylogo = FALSE
   )
 
 # Display
 fig
 
 # ============================================================================
-# SAVE
+# SAVE - with dynamic sizing
 # ============================================================================
 
-saveWidget(fig, 
-           "/Users/shradheyprasad/Desktop/emLab/repo/website-test/levelized_costs.html", 
-           selfcontained = TRUE)
+saveWidget(
+  fig, 
+  "/Users/shradheyprasad/Desktop/emLab/repo/website-test/levelized_costs_dynamic.html", 
+  selfcontained = TRUE,
+  libdir = NULL
+)
