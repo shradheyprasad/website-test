@@ -14,7 +14,7 @@ setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/tables")
 # ============================================================================
 
 system_cost_file <- "system_cost/cost-system_cost.csv"
-# load_data_file <- "dispatch/cost-grouped_dispatch.csv"
+load_data_file <- "emissions/cost-emissions.csv"
 emissions_file <- "emissions/cost-emissions.csv"
 clean_energy_file <- "clean_energy/cost-clean_energy.csv"
 scen_labels_file <- "../labels/cost-scenario_labels.csv"
@@ -22,7 +22,7 @@ scen_labels_file <- "../labels/cost-scenario_labels.csv"
 # Read data
 cat("Reading data...\n")
 system_cost <- read_csv(system_cost_file)
-# load_data <- read_csv(load_data_file)
+load_data <- read_csv(load_data_file)
 emissions <- read_csv(emissions_file)
 clean_energy <- read_csv(clean_energy_file)
 scen_labels <- read_csv(scen_labels_file)
@@ -464,7 +464,7 @@ create_clean_energy_plot <- function(
   scen_labels,
   y_min = NULL,
   y_max = NULL,
-  legend = TRUE,
+  legend = FALSE,
   title = "Clean Energy Share",
   legend_title = "Demand"
 ) {
@@ -516,7 +516,7 @@ create_clean_energy_plot <- function(
           size = 2
         ),
         opacity = 0.75,
-        showlegend = legend, # Changed to use the legend parameter
+        showlegend = FALSE, # Changed to use the legend parameter
         hovertemplate = paste0(
           "<b>",
           scen_labels$label[i],
@@ -604,13 +604,22 @@ saveWidget(
 )
 
 # Plot B: Levelized Cost of Electricity
-# cat("Creating Plot B: Levelized Cost of Electricity...\n")
-# fig_b <- create_levelized_cost_plot(system_cost, load_data, scen_labels,
-#                                      y_min = 40, y_max = 70,
-#                                      legend = FALSE,
-#                                      title = "Levelized Cost of Electricity")
-# fig_b
-# saveWidget(fig_b, paste0(output_dir, "cost_plots/tech_plot_b.html"), selfcontained = TRUE)
+cat("Creating Plot B: Levelized Cost of Electricity...\n")
+fig_b <- create_levelized_cost_plot(
+  system_cost,
+  load_data,
+  scen_labels,
+  y_min = 40,
+  y_max = 70,
+  legend = FALSE,
+  title = "Levelized Cost of Electricity"
+)
+fig_b
+saveWidget(
+  fig_b,
+  paste0(output_dir, "cost_plots/tech_plot_b.html"),
+  selfcontained = TRUE
+)
 
 # Plot C: Carbon Emissions
 fig_c <- create_emissions_plot(
