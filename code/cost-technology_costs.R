@@ -17,7 +17,7 @@ setwd("/Users/shradheyprasad/Desktop/emLab/wri-india/website/tables")
 # Technology costs file (df_1_ in Python)
 cost_file <- "technology_cost/cost-technology_costs.csv"
 
-# Dispatch file - we'll extract load from this (df_2_ in Python) 
+# Dispatch file - we'll extract load from this (df_2_ in Python)
 dispatch_file <- "dispatch/cost-grouped_dispatch.csv"
 
 cat("Reading cost data...\n")
@@ -71,7 +71,7 @@ tech_colors <- c(
 # ============================================================================
 
 USD_to_INR <- 72
-units <- 1  # No unit conversion for now
+units <- 1 # No unit conversion for now
 y_lim_max <- 70
 
 # ============================================================================
@@ -130,7 +130,9 @@ if ("load_zone" %in% names(cost_data)) {
 
 # Calculate load from dispatch data
 # Load = sum of power_mw across all technologies for each scenario+period
-cat("Calculating load from dispatch data (sum of power_mw across technologies)...\n")
+cat(
+  "Calculating load from dispatch data (sum of power_mw across technologies)...\n"
+)
 load_data <- dispatch_data %>%
   mutate(scenario_display = scenario) %>%
   group_by(scenario, scenario_display, period) %>%
@@ -164,7 +166,9 @@ techs_cost <- sort(unique(cost_data[[tech_col]]))
 
 cat("Periods:", paste(periods_cost, collapse = ", "), "\n")
 cat("Scenarios:\n")
-for (s in scenarios_cost) cat("  - ", s, "\n")
+for (s in scenarios_cost) {
+  cat("  - ", s, "\n")
+}
 cat("Technologies:", paste(techs_cost, collapse = ", "), "\n")
 
 cat("\nLOAD DATA:\n")
@@ -173,22 +177,36 @@ scenarios_load <- sort(unique(load_data$scenario_display))
 
 cat("Periods:", paste(periods_load, collapse = ", "), "\n")
 cat("Scenarios:\n")
-for (s in scenarios_load) cat("  - ", s, "\n")
+for (s in scenarios_load) {
+  cat("  - ", s, "\n")
+}
 
 cat("\n=== MATCHING CHECK ===\n")
 cat("Periods match:", identical(periods_cost, periods_load), "\n")
 cat("Scenarios match:", identical(scenarios_cost, scenarios_load), "\n")
 
 if (!identical(periods_cost, periods_load)) {
-  cat("\nPeriods in cost but not in load:", setdiff(periods_cost, periods_load), "\n")
-  cat("Periods in load but not in cost:", setdiff(periods_load, periods_cost), "\n")
+  cat(
+    "\nPeriods in cost but not in load:",
+    setdiff(periods_cost, periods_load),
+    "\n"
+  )
+  cat(
+    "Periods in load but not in cost:",
+    setdiff(periods_load, periods_cost),
+    "\n"
+  )
 }
 
 if (!identical(scenarios_cost, scenarios_load)) {
   cat("\nScenarios in cost but not in load:\n")
-  for (s in setdiff(scenarios_cost, scenarios_load)) cat("  - ", s, "\n")
+  for (s in setdiff(scenarios_cost, scenarios_load)) {
+    cat("  - ", s, "\n")
+  }
   cat("Scenarios in load but not in cost:\n")
-  for (s in setdiff(scenarios_load, scenarios_cost)) cat("  - ", s, "\n")
+  for (s in setdiff(scenarios_load, scenarios_cost)) {
+    cat("  - ", s, "\n")
+  }
 }
 
 # Use only matching values
@@ -214,7 +232,9 @@ tech_order_filtered <- tech_order[tech_order %in% data_technologies]
 cat("\n=== USING FOR PLOT ===\n")
 cat("Periods:", paste(periods, collapse = ", "), "\n")
 cat("Scenarios (in order):\n")
-for (s in scenarios) cat("  - ", s, "\n")
+for (s in scenarios) {
+  cat("  - ", s, "\n")
+}
 cat("Technologies:", paste(tech_order_filtered, collapse = ", "), "\n")
 
 n_periods <- length(periods)
@@ -243,7 +263,7 @@ plot_segments <- data.frame(
   x_position = numeric(),
   value = numeric(),
   base = numeric(),
-  cost_type = character(),  # "variable" or "fixed"
+  cost_type = character(), # "variable" or "fixed"
   color = character(),
   stringsAsFactors = FALSE
 )
@@ -252,20 +272,20 @@ x_current <- x_base
 
 for (i_scen in 1:n_scenarios) {
   scen <- scenarios[i_scen]
-  
+
   cat(sprintf("\n=== Scenario %d/%d: %s ===\n", i_scen, n_scenarios, scen))
-  
+
   for (i_period in 1:n_periods) {
     period <- periods[i_period]
     x_pos <- x_current[i_period]
-    
+
     cat(sprintf("  Period %d (x=%.3f): ", period, x_pos))
-    
+
     # Get load for this scenario+period (z in Python)
     load_val <- load_data %>%
       filter(scenario_display == scen, period == !!period) %>%
       pull(load_mw)
-    
+
     if (length(load_val) == 0) {
       cat("NO LOAD DATA FOUND\n")
       cat(sprintf("    Looking for: scenario='%s', period=%d\n", scen, period))
@@ -273,45 +293,51 @@ for (i_scen in 1:n_scenarios) {
       matching <- load_data %>% filter(period == !!period)
       if (nrow(matching) > 0) {
         for (i in 1:min(3, nrow(matching))) {
-          cat(sprintf("      scenario='%s', period=%d, load=%.0f\n", 
-                     matching$scenario_display[i], matching$period[i], matching$load_mw[i]))
+          cat(sprintf(
+            "      scenario='%s', period=%d, load=%.0f\n",
+            matching$scenario_display[i],
+            matching$period[i],
+            matching$load_mw[i]
+          ))
         }
       }
       next
     }
-    
+
     if (is.na(load_val[1]) || load_val[1] == 0) {
       cat(sprintf("Load = %.2f (ZERO/NA - skipping)\n", load_val[1]))
       next
     }
-    
+
     z <- load_val[1]
     cat(sprintf("Load = %.2f MW | ", z))
-    
+
     # Check how many cost records exist
     cost_count <- cost_data %>%
       filter(scenario_display == scen, period == !!period) %>%
       nrow()
     cat(sprintf("Cost records: %d | ", cost_count))
-    
+
     # Reset offsets for this bar
     offset <- 0
     segments_added <- 0
-    
+
     # STEP 1: Add variable costs (with hatching)
     for (tech in tech_order_filtered) {
       tech_data <- cost_data %>%
-        filter(scenario_display == scen, 
-               period == !!period,
-               .data[[tech_col]] == tech)
-      
+        filter(
+          scenario_display == scen,
+          period == !!period,
+          .data[[tech_col]] == tech
+        )
+
       if (nrow(tech_data) == 1) {
         y <- tech_data$variable_cost[1]
-        
+
         if (!is.na(y) && y != 0) {
           # Levelized cost = cost / load
           levelized_val <- (y / z) / units
-          
+
           segment <- data.frame(
             technology = tech,
             scenario_display = scen,
@@ -323,27 +349,29 @@ for (i_scen in 1:n_scenarios) {
             color = tech_colors[tech],
             stringsAsFactors = FALSE
           )
-          
+
           plot_segments <- rbind(plot_segments, segment)
           offset <- offset + levelized_val
         }
       }
     }
-    
+
     # STEP 2: Add fixed costs (solid, on top of variable)
     for (tech in tech_order_filtered) {
       tech_data <- cost_data %>%
-        filter(scenario_display == scen, 
-               period == !!period,
-               .data[[tech_col]] == tech)
-      
+        filter(
+          scenario_display == scen,
+          period == !!period,
+          .data[[tech_col]] == tech
+        )
+
       if (nrow(tech_data) == 1) {
         y <- tech_data$fixed_cost[1]
-        
+
         if (!is.na(y) && y != 0) {
           # Levelized cost = cost / load
           levelized_val <- (y / z) / units
-          
+
           segment <- data.frame(
             technology = tech,
             scenario_display = scen,
@@ -355,16 +383,16 @@ for (i_scen in 1:n_scenarios) {
             color = tech_colors[tech],
             stringsAsFactors = FALSE
           )
-          
+
           plot_segments <- rbind(plot_segments, segment)
           offset <- offset + levelized_val
         }
       }
     }
-    
+
     cat(sprintf("Segments: %d | Total: %.2f USD/MWh\n", segments_added, offset))
   }
-  
+
   # Increment x for next scenario
   x_current <- x_current + 0.9 / n_scenarios
 }
@@ -385,10 +413,10 @@ fig <- plot_ly()
 for (tech in tech_order_filtered) {
   tech_data <- plot_segments %>%
     filter(technology == tech, cost_type == "variable")
-  
+
   if (nrow(tech_data) > 0) {
     tech_color <- unique(tech_data$color)[1]
-    
+
     fig <- fig %>%
       add_trace(
         type = "bar",
@@ -396,13 +424,13 @@ for (tech in tech_order_filtered) {
         y = tech_data$value,
         name = paste(tech, "(Variable)"),
         legendgroup = tech,
-        showlegend = FALSE,  # Don't show in legend (will use fixed)
+        showlegend = FALSE, # Don't show in legend (will use fixed)
         marker = list(
           color = tech_color,
           pattern = list(
             shape = "x",
-            bgcolor = tech_color,  # Use tech color as background
-            fgcolor = "white",      # White hatching lines
+            bgcolor = tech_color, # Use tech color as background
+            fgcolor = "white", # White hatching lines
             size = 4,
             solidity = 0.5
           ),
@@ -411,9 +439,15 @@ for (tech in tech_order_filtered) {
         width = width,
         base = tech_data$base,
         hovertemplate = paste0(
-          "<b>", tech, " (Variable)</b><br>",
-          "Period: ", tech_data$period, "<br>",
-          "Scenario: ", tech_data$scenario_display, "<br>",
+          "<b>",
+          tech,
+          " (Variable)</b><br>",
+          "Period: ",
+          tech_data$period,
+          "<br>",
+          "Scenario: ",
+          tech_data$scenario_display,
+          "<br>",
           "Cost: %{y:.2f} USD/MWh<br>",
           "<extra></extra>"
         )
@@ -425,7 +459,7 @@ for (tech in tech_order_filtered) {
 for (tech in tech_order_filtered) {
   tech_data <- plot_segments %>%
     filter(technology == tech, cost_type == "fixed")
-  
+
   if (nrow(tech_data) > 0) {
     fig <- fig %>%
       add_trace(
@@ -442,9 +476,15 @@ for (tech in tech_order_filtered) {
         width = width,
         base = tech_data$base,
         hovertemplate = paste0(
-          "<b>", tech, " (Fixed)</b><br>",
-          "Period: ", tech_data$period, "<br>",
-          "Scenario: ", tech_data$scenario_display, "<br>",
+          "<b>",
+          tech,
+          " (Fixed)</b><br>",
+          "Period: ",
+          tech_data$period,
+          "<br>",
+          "Scenario: ",
+          tech_data$scenario_display,
+          "<br>",
           "Cost: %{y:.2f} USD/MWh<br>",
           "<extra></extra>"
         )
@@ -546,7 +586,357 @@ fig
 # SAVE
 # ============================================================================
 
-saveWidget(fig, 
-           "/Users/shradheyprasad/Desktop/emLab/repo/website-test/levelized_costs.html", 
-           selfcontained = TRUE)
+saveWidget(
+  fig,
+  "/Users/shradheyprasad/Desktop/emLab/repo/website-test/levelized_costs.html",
+  selfcontained = TRUE
+)
 
+
+# ============================================================================
+# TECHNOLOGY COSTS BAR CHART
+# ============================================================================
+
+# ============================================================================
+# DATA IMPORT
+# ============================================================================
+
+setwd(
+  "/Users/shradheyprasad/Desktop/emLab/wri-india/website/input_data/technology_cost"
+)
+
+# Technology costs file
+# Columns: period, technology, scenario, variable_cost, fixed_cost
+tech_cost_file <- "cost-technology_costs.csv"
+
+cat("Reading technology costs data...\n")
+tech_cost <- read_csv(tech_cost_file)
+
+# ============================================================================
+# TECHNOLOGY COLORS
+# ============================================================================
+
+# Define technology order (bottom to top in stacked bar)
+# UPDATE THIS ORDER to match your original plot
+tech_order <- c(
+  "Coal",
+  "Gas",
+  "Diesel",
+  "Nuclear",
+  "Other",
+  "Hydro",
+  "Solar",
+  "Wind",
+  "Pumped Storage",
+  "Battery",
+  "Hydrogen",
+  "Transmission Losses"
+)
+
+tech_colors <- c(
+  "Coal" = "#343a40",
+  "Gas" = "#6c757d",
+  "Diesel" = "#924B00",
+  "Nuclear" = "#800080",
+  "Hydro" = "#2a648a",
+  "Solar" = "#ef9226",
+  "Wind" = "#8dc0cd",
+  "Battery" = "#f4e04d",
+  "Pumped Storage" = "#6a96ac",
+  "Hydrogen" = "teal",
+  "Transmission Losses" = "#656d4a",
+  "Other" = "#999999"
+)
+
+# Print technology order
+cat("\n=== Technology Stacking Order (bottom to top) ===\n")
+for (i in seq_along(tech_order)) {
+  cat(sprintf("%2d. %s\n", i, tech_order[i]))
+}
+cat("\n")
+
+# ============================================================================
+# PREPARE DATA
+# ============================================================================
+
+cat("Preparing data...\n")
+
+# Get unique periods and scenarios
+periods <- sort(unique(tech_cost$period))
+scenarios <- unique(tech_cost$scenario)
+
+cat("Periods:", paste(periods, collapse = ", "), "\n")
+cat("Scenarios:", paste(scenarios, collapse = ", "), "\n")
+cat("Technologies:", paste(unique(tech_cost$technology), collapse = ", "), "\n")
+
+n_periods <- length(periods)
+n_scenarios <- length(scenarios)
+
+# Calculate bar width and positions (matching Python logic)
+# Python uses: width = 1/(len(scens_) + 1.5)
+# But we need to adjust for plotly to fill the space better
+bar_width <- 0.9 / n_scenarios # Use most of the space available
+
+# Create x positions for each scenario within each period
+x_positions <- data.frame()
+for (i_period in 1:n_periods) {
+  period <- periods[i_period]
+  x_base <- i_period - 1 # Start from 0 like Python
+
+  for (i_scen in 1:n_scenarios) {
+    scenario <- scenarios[i_scen]
+    # Spread bars evenly across the period space
+    x_pos <- x_base + (i_scen - 1) * bar_width
+
+    x_positions <- rbind(
+      x_positions,
+      data.frame(
+        period = period,
+        scenario = scenario,
+        x_position = x_pos,
+        period_index = i_period - 1
+      )
+    )
+  }
+}
+
+# Join positions to data
+tech_cost <- tech_cost %>%
+  left_join(x_positions, by = c("period", "scenario"))
+
+# ============================================================================
+# CREATE PLOTLY FIGURE
+# ============================================================================
+
+fig <- plot_ly()
+
+# Use the defined technology order
+# Filter to only include technologies that exist in the data
+technologies <- tech_order[tech_order %in% unique(tech_cost$technology)]
+
+cat(
+  "Technologies in plot (bottom to top):",
+  paste(technologies, collapse = ", "),
+  "\n\n"
+)
+
+# STEP 1: Add all variable costs first (bottom layer, with hatching)
+for (tech in technologies) {
+  tech_color <- ifelse(
+    tech %in% names(tech_colors),
+    tech_colors[[tech]],
+    "#999999"
+  )
+
+  tech_data <- tech_cost %>%
+    filter(technology == tech) %>%
+    arrange(period, scenario)
+
+  if (nrow(tech_data) > 0 && any(tech_data$variable_cost > 0)) {
+    # Calculate cumulative bottom for stacking
+    tech_data$bottom <- 0
+
+    for (i in 1:nrow(tech_data)) {
+      period <- tech_data$period[i]
+      scenario <- tech_data$scenario[i]
+
+      # Get sum of all technologies that come before this one (variable only)
+      tech_index <- which(technologies == tech)
+      if (tech_index > 1) {
+        bottom <- tech_cost %>%
+          filter(
+            period == !!period,
+            scenario == !!scenario,
+            technology %in% technologies[1:(tech_index - 1)]
+          ) %>%
+          summarise(total = sum(variable_cost, na.rm = TRUE)) %>%
+          pull(total)
+
+        tech_data$bottom[i] <- ifelse(length(bottom) > 0, bottom, 0)
+      }
+    }
+
+    # Add variable costs with hatching pattern
+    fig <- fig %>%
+      add_trace(
+        type = "bar",
+        x = tech_data$x_position,
+        y = tech_data$variable_cost / 1e9,
+        name = tech,
+        legendgroup = tech,
+        showlegend = FALSE, # Will show in fixed cost trace
+        marker = list(
+          color = tech_color,
+          pattern = list(
+            shape = "/", # Diagonal lines
+            bgcolor = tech_color,
+            fgcolor = "white",
+            size = 8,
+            solidity = 0.3
+          ),
+          line = list(color = "white", width = 0.5)
+        ),
+        width = bar_width,
+        base = tech_data$bottom / 1e9,
+        hovertemplate = paste0(
+          "<b>",
+          tech,
+          " (Variable)</b><br>",
+          "Period: ",
+          tech_data$period,
+          "<br>",
+          "Scenario: ",
+          tech_data$scenario,
+          "<br>",
+          "Variable Cost: %{y:.2f} B USD<br>",
+          "<extra></extra>"
+        )
+      )
+  }
+}
+
+# STEP 2: Add all fixed costs on top (solid color)
+for (tech in technologies) {
+  tech_color <- ifelse(
+    tech %in% names(tech_colors),
+    tech_colors[[tech]],
+    "#999999"
+  )
+
+  tech_data <- tech_cost %>%
+    filter(technology == tech) %>%
+    arrange(period, scenario)
+
+  if (nrow(tech_data) > 0 && any(tech_data$fixed_cost > 0)) {
+    # Calculate cumulative bottom for stacking
+    tech_data$bottom <- 0
+
+    for (i in 1:nrow(tech_data)) {
+      period <- tech_data$period[i]
+      scenario <- tech_data$scenario[i]
+
+      # Bottom = all variable costs + fixed costs before this tech
+      tech_index <- which(technologies == tech)
+
+      # All variable costs (entire bottom layer)
+      bottom_var <- tech_cost %>%
+        filter(period == !!period, scenario == !!scenario) %>%
+        summarise(total = sum(variable_cost, na.rm = TRUE)) %>%
+        pull(total)
+
+      # Fixed costs before this technology
+      bottom_fix <- 0
+      if (tech_index > 1) {
+        bottom_fix <- tech_cost %>%
+          filter(
+            period == !!period,
+            scenario == !!scenario,
+            technology %in% technologies[1:(tech_index - 1)]
+          ) %>%
+          summarise(total = sum(fixed_cost, na.rm = TRUE)) %>%
+          pull(total)
+      }
+
+      if (length(bottom_var) == 0) {
+        bottom_var <- 0
+      }
+      if (length(bottom_fix) == 0) {
+        bottom_fix <- 0
+      }
+
+      tech_data$bottom[i] <- bottom_var + bottom_fix
+    }
+
+    # Add fixed costs (solid)
+    fig <- fig %>%
+      add_trace(
+        type = "bar",
+        x = tech_data$x_position,
+        y = tech_data$fixed_cost / 1e9,
+        name = tech,
+        legendgroup = tech,
+        showlegend = TRUE, # Show in legend
+        marker = list(
+          color = tech_color,
+          line = list(color = "white", width = 0.5)
+        ),
+        width = bar_width,
+        base = tech_data$bottom / 1e9,
+        hovertemplate = paste0(
+          "<b>",
+          tech,
+          " (Fixed)</b><br>",
+          "Period: ",
+          tech_data$period,
+          "<br>",
+          "Scenario: ",
+          tech_data$scenario,
+          "<br>",
+          "Fixed Cost: %{y:.2f} B USD<br>",
+          "<extra></extra>"
+        )
+      )
+  }
+}
+
+# ============================================================================
+# LAYOUT
+# ============================================================================
+
+# Calculate x-axis tick positions (center of each period group)
+x_tick_positions <- x_positions %>%
+  group_by(period) %>%
+  summarise(x_center = mean(x_position), .groups = "drop")
+
+fig <- fig %>%
+  layout(
+    barmode = "stack",
+    title = list(
+      text = "Technology Costs by Period and Scenario",
+      font = list(size = 18, family = "Arial")
+    ),
+    xaxis = list(
+      title = "",
+      tickmode = "array",
+      tickvals = x_tick_positions$x_center,
+      ticktext = x_tick_positions$period,
+      tickfont = list(size = 14),
+      showgrid = FALSE,
+      range = c(
+        -bar_width / 2,
+        n_periods - 1 + n_scenarios * bar_width + bar_width / 2
+      )
+    ),
+    yaxis = list(
+      title = "Technology Costs (Billion USD)",
+      titlefont = list(size = 16),
+      tickfont = list(size = 12),
+      showgrid = TRUE,
+      gridcolor = "lightgray",
+      zeroline = TRUE
+    ),
+    plot_bgcolor = "white",
+    paper_bgcolor = "white",
+    legend = list(
+      title = list(text = "<b>Technology</b>", font = list(size = 14)),
+      font = list(size = 11),
+      x = 1.02,
+      y = 1,
+      xanchor = "left",
+      yanchor = "top"
+    ),
+    margin = list(l = 80, r = 200, t = 80, b = 80)
+  )
+
+# Display
+fig
+
+# ============================================================================
+# SAVE
+# ============================================================================
+
+cat("\nSaving plot...\n")
+saveWidget(fig, "technology_costs_by_period.html", selfcontained = TRUE)
+saveWidget(fig, "technology_costs_by_period.html", selfcontained = TRUE)
+cat("Saved to: technology_costs_by_period.html\n")
+cat("Saved to: technology_costs_by_period.html\n")
